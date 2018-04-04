@@ -32,13 +32,6 @@
 //============================================================+
 
 /**
- * @file
- * Unicode data and encoding maps for TCPDF.
- * @author Nicola Asuni
- * @package com.tecnick.tcpdf
- */
-
-/**
  * @class TCPDF_FONT_DATA
  * Unicode data and encoding maps for TCPDF.
  * @package com.tecnick.tcpdf

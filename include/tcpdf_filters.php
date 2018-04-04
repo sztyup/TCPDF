@@ -33,14 +33,6 @@
 //============================================================+
 
 /**
- * @file
- * This is a PHP class for decoding common PDF filters (PDF 32000-2008 - 7.4 Filters).<br>
- * @package com.tecnick.tcpdf
- * @author Nicola Asuni
- * @version 1.0.001
- */
-
-/**
  * @class TCPDF_FILTERS
  * This is a PHP class for decoding common PDF filters (PDF 32000-2008 - 7.4 Filters).<br>
  * @package com.tecnick.tcpdf
@@ -56,27 +48,28 @@ class TCPDF_FILTERS {
 	 */
 	private static $available_filters = array('ASCIIHexDecode', 'ASCII85Decode', 'LZWDecode', 'FlateDecode', 'RunLengthDecode');
 
-// -----------------------------------------------------------------------------
-
-	/**
-	 * Get a list of available decoding filters.
-	 * @return (array) Array of available filter decoders.
-	 * @since 1.0.000 (2011-05-23)
-	 * @public static
-	 */
-	public static function getAvailableFilters() {
+    /**
+     * Get a list of available decoding filters.
+     * @return array Array of available filter decoders.
+     * @since 1.0.000 (2011-05-23)
+     * @public static
+     */
+	public static function getAvailableFilters()
+    {
 		return self::$available_filters;
 	}
 
-	/**
-	 * Decode data using the specified filter type.
-	 * @param $filter (string) Filter name.
-	 * @param $data (string) Data to decode.
-	 * @return Decoded data string.
-	 * @since 1.0.000 (2011-05-23)
-	 * @public static
-	 */
-	public static function decodeFilter($filter, $data) {
+    /**
+     * Decode data using the specified filter type.
+     * @param $filter (string) Filter name.
+     * @param $data (string) Data to decode.
+     * @return string Decoded data string.
+     * @since 1.0.000 (2011-05-23)
+     * @public static
+     * @throws Exception
+     */
+	public static function decodeFilter($filter, $data)
+    {
 		switch ($filter) {
 			case 'ASCIIHexDecode': {
 				return self::decodeFilterASCIIHexDecode($data);
@@ -125,33 +118,32 @@ class TCPDF_FILTERS {
 		}
 	}
 
-	// --- FILTERS (PDF 32000-2008 - 7.4 Filters) ------------------------------
-
 	/**
 	 * Standard
 	 * Default decoding filter (leaves data unchanged).
 	 * @param $data (string) Data to decode.
-	 * @return Decoded data string.
+	 * @return string Decoded data string.
 	 * @since 1.0.000 (2011-05-23)
 	 * @public static
 	 */
-	public static function decodeFilterStandard($data) {
+	public static function decodeFilterStandard($data)
+    {
 		return $data;
 	}
 
-	/**
-	 * ASCIIHexDecode
-	 * Decodes data encoded in an ASCII hexadecimal representation, reproducing the original binary data.
-	 * @param $data (string) Data to decode.
-	 * @return Decoded data string.
-	 * @since 1.0.000 (2011-05-23)
-	 * @public static
-	 */
+    /**
+     * ASCIIHexDecode
+     * Decodes data encoded in an ASCII hexadecimal representation, reproducing the original binary data.
+     * @param $data (string) Data to decode.
+     * @return string Decoded data string.
+     * @since 1.0.000 (2011-05-23)
+     * @public static
+     * @throws Exception
+     */
 	public static function decodeFilterASCIIHexDecode($data) {
-		// initialize string to return
-		$decoded = '';
 		// all white-space characters shall be ignored
 		$data = preg_replace('/[\s]/', '', $data);
+
 		// check for EOD character: GREATER-THAN SIGN (3Eh)
 		$eod = strpos($data, '>');
 		if ($eod !== false) {
@@ -159,6 +151,7 @@ class TCPDF_FILTERS {
 			$data = substr($data, 0, $eod);
 			$eod = true;
 		}
+
 		// get data length
 		$data_length = strlen($data);
 		if (($data_length % 2) != 0) {
@@ -170,23 +163,27 @@ class TCPDF_FILTERS {
 				self::Error('decodeFilterASCIIHexDecode: invalid code');
 			}
 		}
+
 		// check for invalid characters
 		if (preg_match('/[^a-fA-F\d]/', $data) > 0) {
 			self::Error('decodeFilterASCIIHexDecode: invalid code');
 		}
+
 		// get one byte of binary data for each pair of ASCII hexadecimal digits
 		$decoded = pack('H*', $data);
+
 		return $decoded;
 	}
 
-	/**
-	 * ASCII85Decode
-	 * Decodes data encoded in an ASCII base-85 representation, reproducing the original binary data.
-	 * @param $data (string) Data to decode.
-	 * @return Decoded data string.
-	 * @since 1.0.000 (2011-05-23)
-	 * @public static
-	 */
+    /**
+     * ASCII85Decode
+     * Decodes data encoded in an ASCII base-85 representation, reproducing the original binary data.
+     * @param $data (string) Data to decode.
+     * @return string Decoded data string.
+     * @since 1.0.000 (2011-05-23)
+     * @public static
+     * @throws Exception
+     */
 	public static function decodeFilterASCII85Decode($data) {
 		// initialize string to return
 		$decoded = '';
@@ -260,6 +257,7 @@ class TCPDF_FILTERS {
 				break;
 			}
 		}
+
 		return $decoded;
 	}
 
@@ -267,7 +265,7 @@ class TCPDF_FILTERS {
 	 * LZWDecode
 	 * Decompresses data encoded using the LZW (Lempel-Ziv-Welch) adaptive compression method, reproducing the original text or binary data.
 	 * @param $data (string) Data to decode.
-	 * @return Decoded data string.
+	 * @return string Decoded data string.
 	 * @since 1.0.000 (2011-05-23)
 	 * @public static
 	 */
@@ -344,39 +342,46 @@ class TCPDF_FILTERS {
 		return $decoded;
 	}
 
-	/**
-	 * FlateDecode
-	 * Decompresses data encoded using the zlib/deflate compression method, reproducing the original text or binary data.
-	 * @param $data (string) Data to decode.
-	 * @return Decoded data string.
-	 * @since 1.0.000 (2011-05-23)
-	 * @public static
-	 */
+    /**
+     * FlateDecode
+     * Decompresses data encoded using the zlib/deflate compression method, reproducing the original text or binary data.
+     * @param $data (string) Data to decode.
+     * @return string Decoded data string.
+     * @since 1.0.000 (2011-05-23)
+     * @public static
+     * @throws Exception
+     */
 	public static function decodeFilterFlateDecode($data) {
 		// initialize string to return
 		$decoded = @gzuncompress($data);
+
 		if ($decoded === false) {
 			self::Error('decodeFilterFlateDecode: invalid code');
 		}
+
 		return $decoded;
 	}
 
-	/**
-	 * RunLengthDecode
-	 * Decompresses data encoded using a byte-oriented run-length encoding algorithm.
-	 * @param $data (string) Data to decode.
-	 * @since 1.0.000 (2011-05-23)
-	 * @public static
-	 */
+    /**
+     * RunLengthDecode
+     * Decompresses data encoded using a byte-oriented run-length encoding algorithm.
+     * @param $data (string) Data to decode.
+     * @since 1.0.000 (2011-05-23)
+     * @public static
+     * @return string
+     */
 	public static function decodeFilterRunLengthDecode($data) {
 		// initialize string to return
 		$decoded = '';
+
 		// data length
 		$data_length = strlen($data);
+
 		$i = 0;
 		while($i < $data_length) {
 			// get current byte value
 			$byte = ord($data{$i});
+
 			if ($byte == 128) {
 				// a length value of 128 denote EOD
 				break;
@@ -384,12 +389,14 @@ class TCPDF_FILTERS {
 				// if the length byte is in the range 0 to 127
 				// the following length + 1 (1 to 128) bytes shall be copied literally during decompression
 				$decoded .= substr($data, ($i + 1), ($byte + 1));
+
 				// move to next block
 				$i += ($byte + 2);
 			} else {
 				// if length is in the range 129 to 255,
 				// the following single byte shall be copied 257 - length (2 to 128) times during decompression
 				$decoded .= str_repeat($data{($i + 1)}, (257 - $byte));
+
 				// move to next block
 				$i += 2;
 			}
@@ -397,85 +404,85 @@ class TCPDF_FILTERS {
 		return $decoded;
 	}
 
-	/**
-	 * CCITTFaxDecode (NOT IMPLEMETED - RETURN AN EXCEPTION)
-	 * Decompresses data encoded using the CCITT facsimile standard, reproducing the original data (typically monochrome image data at 1 bit per pixel).
-	 * @param $data (string) Data to decode.
-	 * @return Decoded data string.
-	 * @since 1.0.000 (2011-05-23)
-	 * @public static
-	 */
+    /**
+     * CCITTFaxDecode (NOT IMPLEMETED - RETURN AN EXCEPTION)
+     * Decompresses data encoded using the CCITT facsimile standard, reproducing the original data (typically monochrome image data at 1 bit per pixel).
+     * @param $data (string) Data to decode.
+     * @return string Decoded data string.
+     * @since 1.0.000 (2011-05-23)
+     * @public static
+     * @throws Exception
+     */
 	public static function decodeFilterCCITTFaxDecode($data) {
 		self::Error('~decodeFilterCCITTFaxDecode: this method has not been yet implemented');
 		//return $data;
 	}
 
-	/**
-	 * JBIG2Decode (NOT IMPLEMETED - RETURN AN EXCEPTION)
-	 * Decompresses data encoded using the JBIG2 standard, reproducing the original monochrome (1 bit per pixel) image data (or an approximation of that data).
-	 * @param $data (string) Data to decode.
-	 * @return Decoded data string.
-	 * @since 1.0.000 (2011-05-23)
-	 * @public static
-	 */
+    /**
+     * JBIG2Decode (NOT IMPLEMETED - RETURN AN EXCEPTION)
+     * Decompresses data encoded using the JBIG2 standard, reproducing the original monochrome (1 bit per pixel) image data (or an approximation of that data).
+     * @param $data (string) Data to decode.
+     * @return string Decoded data string.
+     * @since 1.0.000 (2011-05-23)
+     * @public static
+     * @throws Exception
+     */
 	public static function decodeFilterJBIG2Decode($data) {
 		self::Error('~decodeFilterJBIG2Decode: this method has not been yet implemented');
 		//return $data;
 	}
 
-	/**
-	 * DCTDecode (NOT IMPLEMETED - RETURN AN EXCEPTION)
-	 * Decompresses data encoded using a DCT (discrete cosine transform) technique based on the JPEG standard, reproducing image sample data that approximates the original data.
-	 * @param $data (string) Data to decode.
-	 * @return Decoded data string.
-	 * @since 1.0.000 (2011-05-23)
-	 * @public static
-	 */
+    /**
+     * DCTDecode (NOT IMPLEMETED - RETURN AN EXCEPTION)
+     * Decompresses data encoded using a DCT (discrete cosine transform) technique based on the JPEG standard, reproducing image sample data that approximates the original data.
+     * @param $data (string) Data to decode.
+     * @return string Decoded data string.
+     * @since 1.0.000 (2011-05-23)
+     * @public static
+     * @throws Exception
+     */
 	public static function decodeFilterDCTDecode($data) {
 		self::Error('~decodeFilterDCTDecode: this method has not been yet implemented');
 		//return $data;
 	}
 
-	/**
-	 * JPXDecode (NOT IMPLEMETED - RETURN AN EXCEPTION)
-	 * Decompresses data encoded using the wavelet-based JPEG2000 standard, reproducing the original image data.
-	 * @param $data (string) Data to decode.
-	 * @return Decoded data string.
-	 * @since 1.0.000 (2011-05-23)
-	 * @public static
-	 */
+    /**
+     * JPXDecode (NOT IMPLEMETED - RETURN AN EXCEPTION)
+     * Decompresses data encoded using the wavelet-based JPEG2000 standard, reproducing the original image data.
+     * @param $data (string) Data to decode.
+     * @return string Decoded data string.
+     * @since 1.0.000 (2011-05-23)
+     * @public static
+     * @throws Exception
+     */
 	public static function decodeFilterJPXDecode($data) {
 		self::Error('~decodeFilterJPXDecode: this method has not been yet implemented');
 		//return $data;
 	}
 
-	/**
-	 * Crypt (NOT IMPLEMETED - RETURN AN EXCEPTION)
-	 * Decrypts data encrypted by a security handler, reproducing the data as it was before encryption.
-	 * @param $data (string) Data to decode.
-	 * @return Decoded data string.
-	 * @since 1.0.000 (2011-05-23)
-	 * @public static
-	 */
+    /**
+     * Crypt (NOT IMPLEMETED - RETURN AN EXCEPTION)
+     * Decrypts data encrypted by a security handler, reproducing the data as it was before encryption.
+     * @param $data (string) Data to decode.
+     * @return string Decoded data string.
+     * @since 1.0.000 (2011-05-23)
+     * @public static
+     * @throws Exception
+     */
 	public static function decodeFilterCrypt($data) {
 		self::Error('~decodeFilterCrypt: this method has not been yet implemented');
 		//return $data;
 	}
 
-	// --- END FILTERS SECTION -------------------------------------------------
-
-	/**
-	 * Throw an exception.
-	 * @param $msg (string) The error message
-	 * @since 1.0.000 (2011-05-23)
-	 * @public static
-	 */
+    /**
+     * Throw an exception.
+     * @param $msg (string) The error message
+     * @since 1.0.000 (2011-05-23)
+     * @public static
+     * @throws Exception
+     */
 	public static function Error($msg) {
 		throw new Exception('TCPDF_PARSER ERROR: '.$msg);
 	}
 
-} // END OF TCPDF_FILTERS CLASS
-
-//============================================================+
-// END OF FILE
-//============================================================+
+}
